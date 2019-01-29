@@ -15,6 +15,70 @@ $ composer require carterzhou/elasticsearch
 
 ## Usage
 
+Firstly, create an instance of this class. Here we use dependency injection to let Laravel create and inject an instance for us.
+
+```php
+use CarterZhou\Elasticsearch\Elasticsearch;
+
+class TestController extends Controller
+{
+    protected $elasticsearchClient;
+
+    /**
+     * TestController constructor.
+     * @param Elasticsearch $client
+     */
+    public function __construct(Elasticsearch $client)
+    {
+        $this->elasticsearchClient = $client;
+    }
+}
+```
+- Doing simple search. Then we can ```search``` method to grab data from Elasticsearch. Notice that we can chain ```must``` method to add filtering conditions (similar to Eloquent ```where``` method).
+
+```php
+$url = $this->elasticsearchClient->getHost() . '/indices-2019.01.28';
+
+$this->elasticsearchClient
+    ->must('request', 'one-of-urls')
+    ->must('request', 'field1 field2')
+    ->setSize(500);
+
+$this->elasticsearchClient->search($url);
+
+if ($this->elasticsearchClient->hasDocuments()) {
+    foreach ($this->elasticsearchClient->getDocuments() as $document) {
+        // Process your document here...
+    }
+}
+```
+
+- Search for all documents. You can also communicate with Elasticsearch multiple times to get documents if total of matching documents exceed the size you set.
+
+```php
+$url = $this->elasticsearchClient->getHost() . '/indices-2019.01.28';
+
+$this->elasticsearchClient
+    ->must('request', 'one-of-urls')
+    ->must('request', 'field1 field2')
+    ->setSize(500);
+
+do {
+    $this->elasticsearchClient->search($url);
+
+    if ($this->elasticsearchClient->hasDocuments()) {
+
+        foreach ($this->elasticsearchClient->getDocuments() as $redirect) {
+            // Process your document here...
+        }
+    }
+} while ($this->elasticsearchClient->hasMoreDocuments());
+```
+
+Notice that we use a ```do while``` loop here because a search will be performed at least once. You don't have to manually set "from" because the ```search``` method will calculate and maintain properties including "from" under the hood.
+
+Warning: you should not ```search``` method if total of matching documents is over 10000, because by default the result window is 10000 by using "from" to do query. In such case, please use ```scroll``` method instead.
+
 ## Change log
 
 Please see the [changelog](changelog.md) for more information on what has changed recently.

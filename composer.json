@@ -1,0 +1,42 @@
+{
+    "name": "carterzhou/elasticsearch",
+    "description": "Yet another Elasticsearch client for your Laravel project",
+    "license": "MIT License",
+    "authors": [
+        {
+            "name": "Carter Zhou",
+            "email": "zhou.hao.0112@gmail.com"
+        }
+    ],
+    "homepage": "https://github.com/carterzhou/elasticsearch",
+    "keywords": ["Laravel", "Elasticsearch"],
+    "require": {
+        "illuminate/support": "~5"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~7.0",
+        "mockery/mockery": "^1.1",
+        "orchestra/testbench": "~3.0",
+        "sempro/phpunit-pretty-print": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "CarterZhou\\Elasticsearch\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CarterZhou\\Elasticsearch\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "CarterZhou\\Elasticsearch\\ElasticsearchServiceProvider"
+            ],
+            "aliases": {
+                "Elasticsearch": "CarterZhou\\Elasticsearch\\Facades\\Elasticsearch"
+            }
+        }
+    }
+}

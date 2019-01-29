@@ -1,7 +1,7 @@
 {
     "name": "carterzhou/elasticsearch",
     "description": "Yet another Elasticsearch client for your Laravel project",
-    "license": "MIT License",
+    "license": "MIT",
     "authors": [
         {
             "name": "Carter Zhou",
@@ -11,7 +11,9 @@
     "homepage": "https://github.com/carterzhou/elasticsearch",
     "keywords": ["Laravel", "Elasticsearch"],
     "require": {
-        "illuminate/support": "~5"
+        "illuminate/support": "~5",
+        "ext-json": "*",
+        "nesbot/carbon": "~1.34"
     },
     "require-dev": {
         "phpunit/phpunit": "~7.0",

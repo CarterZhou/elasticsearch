@@ -53,7 +53,7 @@ if ($this->elasticsearchClient->hasDocuments()) {
 }
 ```
 
-- Search for all documents. You can also communicate with Elasticsearch multiple times to get documents if total of matching documents exceed the size you set.
+- Search for all documents. You can also communicate with Elasticsearch multiple times to get documents if total of matching documents exceeds the size you set.
 
 ```php
 $url = $this->elasticsearchClient->getHost() . '/indices-2019.01.28';
@@ -77,7 +77,7 @@ do {
 
 Notice that we use a ```do while``` loop here because a search will be performed at least once. You don't have to manually set "from" because the ```search``` method will calculate and maintain properties including "from" under the hood.
 
-Warning: you should not ```search``` method if total of matching documents is over 10000, because by default the result window is 10000 by using "from" to do query. In such case, please use ```scroll``` method instead.
+Warning: you should not use ```search``` method if total of matching documents is over 10000, because by default the result window is 10000 by using "from" to do query. In such case, please use ```scroll``` method instead.
 
 ## Change log
 

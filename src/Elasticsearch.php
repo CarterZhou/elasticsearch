@@ -23,9 +23,9 @@ class Elasticsearch
      */
     protected $host;
     /**
-     * @var string
+     * @var array
      */
-    protected $historicalClusterUrl;
+    protected $payload;
     /**
      * @var array
      */
@@ -33,11 +33,11 @@ class Elasticsearch
     /**
      * @var int
      */
-    protected $size = 10;
+    protected $total = 0;
     /**
      * @var int
      */
-    protected $total = 0;
+    protected $size = 10;
     /**
      * @var int
      */
@@ -47,15 +47,15 @@ class Elasticsearch
      */
     protected $currentRound = 1;
     /**
-     * datetime string in ISO 8601 format, example: 2019-01-01T00:00:00Z
+     *  A datetime string in ISO 8601 format, example: 2019-01-01T00:00:00Z.
      *
      * @var string
      */
     protected $startDatetime;
     /**
-     * datetime string in ISO 8601 format, example: 2019-01-01T00:00:00Z
+     * A datetime string in ISO 8601 format, example: 2019-01-01T00:00:00Z.
      *
-     * @var
+     * @var string
      */
     protected $endDatetime;
 
@@ -65,6 +65,7 @@ class Elasticsearch
         $this->version = config('elasticsearch.version');
         $this->username = config('elasticsearch.username');
         $this->password = config('elasticsearch.password');
+        $this->payload['query'] = [];
     }
 
     public function reset()
@@ -73,22 +74,41 @@ class Elasticsearch
         $this->currentRound = 1;
         $this->from = 0;
         $this->response = [];
+        $this->payload = [];
     }
 
     /**
      * @param string $url
-     * @param array $payload
      * @return Elasticsearch
      */
-    public function search($url, array $payload)
+    public function search($url)
     {
-        $this->response = $this->curl("$url/_search", $payload);
+        $this->response = $this->curl("$url/_search");
 
         if (isset($this->response['hits'])) {
             $this->total = $this->response['hits']['total'];
             $this->currentRound++;
             $this->from = $this->size * ($this->currentRound - 1);
         }
+
+        return $this;
+    }
+
+    /**
+     * @param $field
+     * @param $value
+     * @return Elasticsearch
+     */
+    public function must($field, $value)
+    {
+        if (!isset($this->payload['query']['bool']['must'])) {
+            $this->payload['query']['bool']['must'] = [];
+        }
+        $this->payload['query']['bool']['must'][] = [
+            'match' => [
+                $field => $value
+            ]
+        ];
 
         return $this;
     }
@@ -111,15 +131,12 @@ class Elasticsearch
 
     /**
      * @param string $url
-     * @param array $payload
      * @return array
      */
-    protected function curl($url, $payload)
+    protected function curl($url)
     {
-        $payload = $this->appendSize($payload, $this->size);
-        $payload = $this->appendFrom($payload, $this->from);
-        $payload = $this->appendDatetimeRange($payload);
-        $payload = json_encode($payload);
+        $this->appendSize()->appendFrom()->appendDatetimeRange();
+        $payload = json_encode($this->payload);
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
@@ -134,13 +151,12 @@ class Elasticsearch
     }
 
     /**
-     * @param array $payload
-     * @return array
+     * @return Elasticsearch
      */
-    protected function appendDatetimeRange($payload)
+    protected function appendDatetimeRange()
     {
         if (strlen($this->startDatetime) && strlen($this->endDatetime)) {
-            $payload['query']['bool']['must'][] = [
+            $this->payload['query']['bool']['must'][] = [
                 'range' => [
                     '@timestamp' => [
                         'gte' => $this->startDatetime,
@@ -150,35 +166,25 @@ class Elasticsearch
             ];
         }
 
-        return $payload;
+        return $this;
     }
 
     /**
-     * @param array $payload
-     * @param int $size
-     * @return array
+     * @return Elasticsearch
      */
-    protected function appendSize($payload, $size)
+    protected function appendSize()
     {
-        if (!isset($payload['size'])) {
-            $payload['size'] = 0;
-        }
-        $payload['size'] = $size;
-        return $payload;
+        $this->payload['size'] = $this->size;
+        return $this;
     }
 
     /**
-     * @param array $payload
-     * @param int $from
-     * @return array
+     * @return Elasticsearch
      */
-    protected function appendFrom($payload, $from)
+    protected function appendFrom()
     {
-        if (!isset($payload['from'])) {
-            $payload['from'] = 0;
-        }
-        $payload['from'] = $from;
-        return $payload;
+        $this->payload['from'] = $this->from;
+        return $this;
     }
 
     /**
@@ -195,14 +201,6 @@ class Elasticsearch
     public function getHost()
     {
         return $this->host;
-    }
-
-    /**
-     * @return string
-     */
-    public function getHistoricalClusterUrl()
-    {
-        return $this->historicalClusterUrl;
     }
 
     /**
@@ -228,8 +226,10 @@ class Elasticsearch
     }
 
     /**
-     * Because start datetime and end datetime can be across 2 days,
-     * here maximum two indices will be returned.
+     * A common strategy to index documents is grouping them by dates.
+     * A typical index format would be like "logstash-2019.01.01".
+     * This method is designed to work out which indices should be used upon searching.
+     * Because start datetime and end datetime can be across 2 days, here maximum 2 indices will be returned.
      *
      * @return array
      */

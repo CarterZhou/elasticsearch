@@ -34,7 +34,9 @@ class TestController extends Controller
     }
 }
 ```
-- Doing simple search. Then we can ```search``` method to grab data from Elasticsearch. Notice that we can chain ```must``` method to add filtering conditions (similar to Eloquent ```where``` method).
+- Doing simple search
+
+Then we can ```search``` method to grab data from Elasticsearch. Notice that we can chain ```must``` method to add filtering conditions (similar to Eloquent ```where``` method).
 
 ```php
 $url = $this->elasticsearchClient->getHost() . '/indices-2019.01.28';
@@ -79,15 +81,30 @@ Notice that we use a ```do while``` loop here because a search will be performed
 
 Warning: you should not use ```search``` method if total of matching documents is over 10000, because by default the result window is 10000 by using "from" to do query. In such case, please use ```scroll``` method instead.
 
+- Us scrolling
+
+As stated above, do not use ```search``` method to loop through large result sets because normally you are not allowed to do so. To address such need, you can use ```scroll``` method like so
+
+```php
+$url = $this->elasticsearchClient->getHost() . '/logstash*';
+
+$this->elasticsearchClient->matchAll()->setSize(500);
+
+$this->elasticsearchClient->scroll($url);
+
+do {
+    foreach ($this->elasticsearchClient->getDocuments() as $document) {
+        // Process your document here...
+    }
+
+    $this->elasticsearchClient->scroll($url);
+
+} while ($this->elasticsearchClient->hasDocuments());
+```
+
 ## Change log
 
 Please see the [changelog](changelog.md) for more information on what has changed recently.
-
-## Testing
-
-``` bash
-$ composer test
-```
 
 ## Contributing
 

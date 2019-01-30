@@ -18,19 +18,19 @@ $ composer require carterzhou/elasticsearch
 Firstly, create an instance of this class. Here we use dependency injection to let Laravel create and inject an instance for us.
 
 ```php
-use CarterZhou\Elasticsearch\Elasticsearch;
+use CarterZhou\Elasticsearch\Client;
 
 class TestController extends Controller
 {
-    protected $elasticsearchClient;
+    protected $client;
 
     /**
      * TestController constructor.
-     * @param Elasticsearch $client
+     * @param Client $client
      */
-    public function __construct(Elasticsearch $client)
+    public function __construct(Client $client)
     {
-        $this->elasticsearchClient = $client;
+        $this->client = $client;
     }
 }
 ```
@@ -39,17 +39,17 @@ class TestController extends Controller
 Then we can use ```search``` method to grab data from Elasticsearch. Notice that we can chain ```must``` method to add filtering conditions (similar to Eloquent ```where``` method).
 
 ```php
-$url = $this->elasticsearchClient->getHost() . '/indices-2019.01.28';
+$url = $this->client->getHost() . '/indices-2019.01.28';
 
-$this->elasticsearchClient
+$this->client
     ->must('request', 'one-of-urls')
     ->must('request', 'field1 field2')
     ->setSize(500);
 
-$this->elasticsearchClient->search($url);
+$this->client->search($url);
 
-if ($this->elasticsearchClient->hasDocuments()) {
-    foreach ($this->elasticsearchClient->getDocuments() as $document) {
+if ($this->client->hasDocuments()) {
+    foreach ($this->client->getDocuments() as $document) {
         // Process your document here...
     }
 }
@@ -58,23 +58,23 @@ if ($this->elasticsearchClient->hasDocuments()) {
 - Search for all documents. You can also communicate with Elasticsearch multiple times to get documents if total of matching documents exceeds the size you set.
 
 ```php
-$url = $this->elasticsearchClient->getHost() . '/indices-2019.01.28';
+$url = $this->client->getHost() . '/indices-2019.01.28';
 
-$this->elasticsearchClient
+$this->client
     ->must('request', 'one-of-urls')
     ->must('request', 'field1 field2')
     ->setSize(500);
 
 do {
-    $this->elasticsearchClient->search($url);
+    $this->client->search($url);
 
-    if ($this->elasticsearchClient->hasDocuments()) {
+    if ($this->client->hasDocuments()) {
 
-        foreach ($this->elasticsearchClient->getDocuments() as $redirect) {
+        foreach ($this->client->getDocuments() as $redirect) {
             // Process your document here...
         }
     }
-} while ($this->elasticsearchClient->hasMoreDocuments());
+} while ($this->client->hasMoreDocuments());
 ```
 
 Notice that we use a ```do while``` loop here because a search will be performed at least once. You don't have to manually set "from" because the ```search``` method will calculate and maintain properties including "from" under the hood.
@@ -86,20 +86,20 @@ Warning: you should not use ```search``` method if total of matching documents i
 As stated above, do not use ```search``` method to loop through large result sets because normally you are not allowed to do so. To address such need, you can use ```scroll``` method like so
 
 ```php
-$url = $this->elasticsearchClient->getHost() . '/logstash*';
+$url = $this->client->getHost() . '/logstash*';
 
-$this->elasticsearchClient->matchAll()->setSize(500);
+$this->client->matchAll()->setSize(500);
 
-$this->elasticsearchClient->scroll($url);
+$this->client->scroll($url);
 
 do {
-    foreach ($this->elasticsearchClient->getDocuments() as $document) {
+    foreach ($this->client->getDocuments() as $document) {
         // Process your document here...
     }
 
-    $this->elasticsearchClient->scroll($url);
+    $this->client->scroll($url);
 
-} while ($this->elasticsearchClient->hasDocuments());
+} while ($this->client->hasDocuments());
 ```
 
 ## Change log

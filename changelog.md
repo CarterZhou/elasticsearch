@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.0.2
+### Updated
+- Rename class ```CarterZhou\Elasticsearch\Elasticsearch``` to ```CarterZhou\Elasticsearch\Client```
+
 ## Version 1.0.1
 ### Added
 - A chainable method ```must``` whereby user can add filter conditions.

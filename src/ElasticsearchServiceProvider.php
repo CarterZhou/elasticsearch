@@ -30,7 +30,7 @@ class ElasticsearchServiceProvider extends ServiceProvider
 
         // Register the service the package provides.
         $this->app->singleton('elasticsearch', function ($app) {
-            return new Elasticsearch;
+            return new Client;
         });
     }
 

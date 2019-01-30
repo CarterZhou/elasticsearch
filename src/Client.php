@@ -4,7 +4,7 @@ namespace CarterZhou\Elasticsearch;
 
 use Carbon\Carbon;
 
-class Elasticsearch
+class Client
 {
     /**
      * @var string
@@ -87,7 +87,7 @@ class Elasticsearch
 
     /**
      * @param string $url
-     * @return Elasticsearch
+     * @return Client
      */
     public function search($url)
     {
@@ -105,7 +105,7 @@ class Elasticsearch
 
     /**
      * @param string $url
-     * @return Elasticsearch
+     * @return Client
      */
     public function scroll($url)
     {
@@ -122,7 +122,7 @@ class Elasticsearch
     /**
      * @param string $field
      * @param mixed $value
-     * @return Elasticsearch
+     * @return Client
      */
     public function must($field, $value)
     {
@@ -139,7 +139,7 @@ class Elasticsearch
     }
 
     /**
-     * @return Elasticsearch
+     * @return Client
      */
     public function matchAll()
     {
@@ -167,7 +167,7 @@ class Elasticsearch
     }
 
     /**
-     * @return Elasticsearch
+     * @return Client
      */
     protected function appendDatetimeRange()
     {
@@ -186,7 +186,7 @@ class Elasticsearch
     }
 
     /**
-     * @return Elasticsearch
+     * @return Client
      */
     protected function appendSize()
     {
@@ -195,7 +195,7 @@ class Elasticsearch
     }
 
     /**
-     * @return Elasticsearch
+     * @return Client
      */
     protected function appendFrom()
     {
@@ -221,7 +221,7 @@ class Elasticsearch
 
     /**
      * @param int $size
-     * @return Elasticsearch
+     * @return Client
      */
     public function setSize($size)
     {
@@ -232,7 +232,7 @@ class Elasticsearch
     /**
      * @param string $start
      * @param string $end
-     * @return Elasticsearch
+     * @return Client
      */
     public function setDatetimeRange($start, $end)
     {

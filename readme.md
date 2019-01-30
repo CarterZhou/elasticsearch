@@ -81,7 +81,7 @@ Notice that we use a ```do while``` loop here because a search will be performed
 
 Warning: you should not use ```search``` method if total of matching documents is over 10000, because by default the result window is 10000 by using "from" to do query. In such case, please use ```scroll``` method instead.
 
-- Us scrolling
+- Use scrolling
 
 As stated above, do not use ```search``` method to loop through large result sets because normally you are not allowed to do so. To address such need, you can use ```scroll``` method like so
 

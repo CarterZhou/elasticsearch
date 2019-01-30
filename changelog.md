@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.0.4
+### Updated
+- Rename method ```must``` to ```match```
+- Fix ```search```
+
 ## Version 1.0.3
 ### Added
 - A ```raw``` method that enables user to search through json formatted payload directly.

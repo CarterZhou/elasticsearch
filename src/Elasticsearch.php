@@ -47,6 +47,14 @@ class Elasticsearch
      */
     protected $currentRound = 1;
     /**
+     * @var string
+     */
+    protected $contextAliveTime = '1m';
+    /**
+     * @var string
+     */
+    protected $scrollId = '';
+    /**
      *  A datetime string in ISO 8601 format, example: 2019-01-01T00:00:00Z.
      *
      * @var string
@@ -83,6 +91,7 @@ class Elasticsearch
      */
     public function search($url)
     {
+        $this->appendFrom()->appendDatetimeRange();
         $this->response = $this->curl("$url/_search");
 
         if (isset($this->response['hits'])) {
@@ -95,8 +104,24 @@ class Elasticsearch
     }
 
     /**
-     * @param $field
-     * @param $value
+     * @param string $url
+     * @return Elasticsearch
+     */
+    public function scroll($url)
+    {
+        if (strlen($this->scrollId)) {
+            $this->response = $this->setScrollPayload()->curl($this->getHost() . '/_search/scroll');
+        } else {
+            $this->response = $this->appendSize()->curl("$url/_search?scroll=1m");
+        }
+        $this->scrollId = $this->response['_scroll_id'];
+
+        return $this;
+    }
+
+    /**
+     * @param string $field
+     * @param mixed $value
      * @return Elasticsearch
      */
     public function must($field, $value)
@@ -114,11 +139,23 @@ class Elasticsearch
     }
 
     /**
+     * @return Elasticsearch
+     */
+    public function matchAll()
+    {
+        $this->payload['query'] = [
+            'match_all' => (object)[]
+        ];
+
+        return $this;
+    }
+
+    /**
      * @return bool
      */
     public function hasDocuments()
     {
-        return $this->total > 0;
+        return count($this->response['hits']['hits']);
     }
 
     /**
@@ -127,27 +164,6 @@ class Elasticsearch
     public function hasMoreDocuments()
     {
         return $this->from < $this->total;
-    }
-
-    /**
-     * @param string $url
-     * @return array
-     */
-    protected function curl($url)
-    {
-        $this->appendSize()->appendFrom()->appendDatetimeRange();
-        $payload = json_encode($this->payload);
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', "kbn-version: {$this->version}"]);
-        curl_setopt($ch, CURLOPT_USERPWD, "{$this->username}:{$this->password}");
-        $response = curl_exec($ch);
-        curl_close($ch);
-        $response = json_decode($response, true);
-
-        return $response;
     }
 
     /**
@@ -244,5 +260,34 @@ class Elasticsearch
         }
 
         return $indices;
+    }
+
+    /**
+     * @param string $url
+     * @return array
+     */
+    protected function curl($url)
+    {
+        $payload = json_encode($this->payload);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', "kbn-version: {$this->version}"]);
+        curl_setopt($ch, CURLOPT_USERPWD, "{$this->username}:{$this->password}");
+        $response = curl_exec($ch);
+        curl_close($ch);
+        $response = json_decode($response, true);
+
+        return $response;
+    }
+
+    protected function setScrollPayload()
+    {
+        $this->payload = [
+            'scroll' => $this->contextAliveTime,
+            'scroll_id' => $this->scrollId
+        ];
+        return $this;
     }
 }

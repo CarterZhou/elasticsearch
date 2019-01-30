@@ -34,14 +34,14 @@ class TestController extends Controller
 ```
 - Doing simple search
 
-Then we can use ```search``` method to grab data from Elasticsearch. Notice that we can chain ```must``` method to add filtering conditions (similar to Eloquent ```where``` method).
+Then we can use ```search``` method to grab data from Elasticsearch. Notice that we can chain ```match``` method to add filtering conditions (similar to Eloquent ```where``` method).
 
 ```php
 $url = $this->client->getHost() . '/indices-2019.01.28';
 
 $this->client
-    ->must('request', 'one-of-urls')
-    ->must('request', 'field1 field2')
+    ->match('request', 'one-of-urls')
+    ->match('request', 'field1 field2')
     ->setSize(500);
 
 $this->client->search($url);
@@ -59,8 +59,8 @@ if ($this->client->hasDocuments()) {
 $url = $this->client->getHost() . '/indices-2019.01.28';
 
 $this->client
-    ->must('request', 'one-of-urls')
-    ->must('request', 'field1 field2')
+    ->match('request', 'one-of-urls')
+    ->match('request', 'field1 field2')
     ->setSize(500);
 
 do {

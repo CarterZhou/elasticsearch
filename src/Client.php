@@ -134,7 +134,7 @@ class Client
      * @param mixed $value
      * @return Client
      */
-    public function must($field, $value)
+    public function match($field, $value)
     {
         if (!isset($this->payload['query']['bool']['must'])) {
             $this->payload['query']['bool']['must'] = [];

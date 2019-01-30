@@ -27,6 +27,10 @@ class Client
      */
     protected $payload;
     /**
+     * @var string
+     */
+    protected $rawPayload = '';
+    /**
      * @var array
      */
     protected $response;
@@ -41,7 +45,7 @@ class Client
     /**
      * @var int
      */
-    protected $from = 0;
+    protected $from = -1;
     /**
      * @var int
      */
@@ -159,6 +163,16 @@ class Client
     }
 
     /**
+     * @param string $rawPayload
+     * @return Client
+     */
+    public function raw($rawPayload)
+    {
+        $this->rawPayload = $rawPayload;
+        return $this;
+    }
+
+    /**
      * @return bool
      */
     public function hasMoreDocuments()
@@ -167,48 +181,20 @@ class Client
     }
 
     /**
-     * @return Client
-     */
-    protected function appendDatetimeRange()
-    {
-        if (strlen($this->startDatetime) && strlen($this->endDatetime)) {
-            $this->payload['query']['bool']['must'][] = [
-                'range' => [
-                    '@timestamp' => [
-                        'gte' => $this->startDatetime,
-                        'lte' => $this->endDatetime
-                    ]
-                ]
-            ];
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Client
-     */
-    protected function appendSize()
-    {
-        $this->payload['size'] = $this->size;
-        return $this;
-    }
-
-    /**
-     * @return Client
-     */
-    protected function appendFrom()
-    {
-        $this->payload['from'] = $this->from;
-        return $this;
-    }
-
-    /**
      * @return mixed
      */
     public function getDocuments()
     {
         return $this->response['hits']['hits'];
+    }
+
+    /**
+     * @param $name
+     * @return array
+     */
+    public function getAggregations($name)
+    {
+        return $this->response['aggregations'][$name]['buckets'];
     }
 
     /**
@@ -268,7 +254,7 @@ class Client
      */
     protected function curl($url)
     {
-        $payload = json_encode($this->payload);
+        $payload = strlen($this->rawPayload) ? $this->rawPayload : json_encode($this->payload);
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
@@ -288,6 +274,45 @@ class Client
             'scroll' => $this->contextAliveTime,
             'scroll_id' => $this->scrollId
         ];
+        return $this;
+    }
+
+    /**
+     * @return Client
+     */
+    protected function appendDatetimeRange()
+    {
+        if (strlen($this->startDatetime) && strlen($this->endDatetime)) {
+            $this->payload['query']['bool']['must'][] = [
+                'range' => [
+                    '@timestamp' => [
+                        'gte' => $this->startDatetime,
+                        'lte' => $this->endDatetime
+                    ]
+                ]
+            ];
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Client
+     */
+    protected function appendSize()
+    {
+        $this->payload['size'] = $this->size;
+        return $this;
+    }
+
+    /**
+     * @return Client
+     */
+    protected function appendFrom()
+    {
+        if ($this->from >= 0) {
+            $this->payload['from'] = $this->from;
+        }
         return $this;
     }
 }

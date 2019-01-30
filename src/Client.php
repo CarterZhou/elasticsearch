@@ -192,7 +192,7 @@ class Client
      * @param $name
      * @return array
      */
-    public function getAggregations($name)
+    public function getTop($name)
     {
         return $this->response['aggregations'][$name]['buckets'];
     }

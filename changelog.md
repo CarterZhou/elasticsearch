@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.0.3
+### Added
+- A ```raw``` method that enables user to search through json formatted payload directly.
+- A ```getTop``` method that let user to get "terms" aggregation result.
+
 ## Version 1.0.2
 ### Updated
 - Rename class ```CarterZhou\Elasticsearch\Elasticsearch``` to ```CarterZhou\Elasticsearch\Client```

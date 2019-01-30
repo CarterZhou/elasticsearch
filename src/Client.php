@@ -45,7 +45,7 @@ class Client
     /**
      * @var int
      */
-    protected $from = -1;
+    protected $from = 0;
     /**
      * @var int
      */
@@ -87,6 +87,8 @@ class Client
         $this->from = 0;
         $this->response = [];
         $this->payload = [];
+        $this->rawPayload = '';
+        $this->scrollId = '';
     }
 
     /**
@@ -95,7 +97,11 @@ class Client
      */
     public function search($url)
     {
-        $this->appendFrom()->appendDatetimeRange();
+        // Only set "size", "from" and "range" if raw payload is empty string.
+        if (strlen($this->rawPayload) === 0) {
+            $this->appendSize()->appendFrom()->appendDatetimeRange();
+        }
+
         $this->response = $this->curl("$url/_search");
 
         if (isset($this->response['hits'])) {
@@ -310,9 +316,7 @@ class Client
      */
     protected function appendFrom()
     {
-        if ($this->from >= 0) {
-            $this->payload['from'] = $this->from;
-        }
+        $this->payload['from'] = $this->from;
         return $this;
     }
 }

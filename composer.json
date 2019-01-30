@@ -1,6 +1,6 @@
 {
     "name": "carterzhou/elasticsearch",
-    "description": "A package provides fluent API to work with Elasticsearch",
+    "description": "A Laravel package provides fluent API to work with Elasticsearch",
     "license": "MIT",
     "authors": [
         {

@@ -1,4 +1,4 @@
-# Elasticsearch
+# Laravel fluent APIs to work with Elasticsearch
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Total Downloads][ico-downloads]][link-downloads]
@@ -36,7 +36,7 @@ class TestController extends Controller
 ```
 - Doing simple search
 
-Then we can ```search``` method to grab data from Elasticsearch. Notice that we can chain ```must``` method to add filtering conditions (similar to Eloquent ```where``` method).
+Then we can use ```search``` method to grab data from Elasticsearch. Notice that we can chain ```must``` method to add filtering conditions (similar to Eloquent ```where``` method).
 
 ```php
 $url = $this->elasticsearchClient->getHost() . '/indices-2019.01.28';

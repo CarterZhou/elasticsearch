@@ -159,7 +159,21 @@ class Client
         $this->payload['query'] = [
             'match_all' => (object)[]
         ];
+        return $this;
+    }
 
+    /**
+     * @param string $field
+     * @param string $pattern
+     * @return Client
+     */
+    public function wildcard($field, $pattern)
+    {
+        $this->payload['query']['bool']['must'][] = [
+            'wildcard' => [
+                $field => $pattern
+            ]
+        ];
         return $this;
     }
 
@@ -274,7 +288,7 @@ class Client
     {
         $this->payload['aggs'] = [
             "group_by_$field" => [
-                'terms'=> [
+                'terms' => [
                     'field' => "$field.keyword"
                 ]
             ]

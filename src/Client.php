@@ -70,6 +70,10 @@ class Client
      * @var string
      */
     protected $endDatetime;
+    /**
+     * @var string
+     */
+    protected $fieldForAggregation = '';
 
     public function __construct()
     {
@@ -77,7 +81,6 @@ class Client
         $this->version = config('elasticsearch.version');
         $this->username = config('elasticsearch.username');
         $this->password = config('elasticsearch.password');
-        $this->payload['query'] = [];
     }
 
     public function reset()
@@ -198,7 +201,7 @@ class Client
      * @param $name
      * @return array
      */
-    public function getTop($name)
+    public function getBucketAggregation($name)
     {
         return $this->response['aggregations'][$name]['buckets'];
     }
@@ -253,6 +256,55 @@ class Client
 
         return $indices;
     }
+
+    /**
+     * @return Client
+     */
+    public function aggregate()
+    {
+        $this->payload['aggs'] = [];
+        return $this;
+    }
+
+    /**
+     * @param string $field
+     * @return Client
+     */
+    public function groupBy($field)
+    {
+        $this->payload['aggs'] = [
+            "group_by_$field" => [
+                'terms'=> [
+                    'field' => "$field.keyword"
+                ]
+            ]
+        ];
+        $this->fieldForAggregation = "group_by_$field";
+        return $this;
+    }
+
+    /**
+     * @param int $size
+     * @return Client
+     */
+    public function most($size)
+    {
+        $this->payload['aggs'][$this->fieldForAggregation]['terms']['order'] = ['_count' => 'desc'];
+        $this->payload['aggs'][$this->fieldForAggregation]['terms']['size'] = $size;
+        return $this;
+    }
+
+    /**
+     * @param int $size
+     * @return Client
+     */
+    public function least($size)
+    {
+        $this->payload['aggs'][$this->fieldForAggregation]['terms']['order'] = ['_count' => 'asc'];
+        $this->payload['aggs'][$this->fieldForAggregation]['terms']['size'] = $size;
+        return $this;
+    }
+
 
     /**
      * @param string $url

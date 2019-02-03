@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.0.5
+### Added
+- Methods ```aggreate```, ```groupBy```, ```most``` and ```least``` for setting terms aggregation query.
+- A ```getBucketAggregation``` method for getting aggregation result.
+- A ```wildcard``` method for setting wildcard query.
+
 ## Version 1.0.4
 ### Updated
 - Rename method ```must``` to ```match```

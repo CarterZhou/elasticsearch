@@ -25,11 +25,11 @@ class Client
     /**
      * @var array
      */
-    protected $payload;
+    protected $body;
     /**
      * @var string
      */
-    protected $rawPayload = '';
+    protected $rawBody = '';
     /**
      * @var array
      */
@@ -89,8 +89,8 @@ class Client
         $this->currentRound = 1;
         $this->from = 0;
         $this->response = [];
-        $this->payload = [];
-        $this->rawPayload = '';
+        $this->body = [];
+        $this->rawBody = '';
         $this->scrollId = '';
     }
 
@@ -101,7 +101,7 @@ class Client
     public function search($url)
     {
         // Only set "size", "from" and "range" if raw payload is empty string.
-        if (strlen($this->rawPayload) === 0) {
+        if (strlen($this->rawBody) === 0) {
             $this->appendSize()->appendFrom()->appendDatetimeRange();
         }
 
@@ -139,10 +139,10 @@ class Client
      */
     public function match($field, $value)
     {
-        if (!isset($this->payload['query']['bool']['must'])) {
-            $this->payload['query']['bool']['must'] = [];
+        if (!isset($this->body['query']['bool']['must'])) {
+            $this->body['query']['bool']['must'] = [];
         }
-        $this->payload['query']['bool']['must'][] = [
+        $this->body['query']['bool']['must'][] = [
             'match' => [
                 $field => $value
             ]
@@ -156,7 +156,7 @@ class Client
      */
     public function matchAll()
     {
-        $this->payload['query'] = [
+        $this->body['query'] = [
             'match_all' => (object)[]
         ];
         return $this;
@@ -169,7 +169,7 @@ class Client
      */
     public function wildcard($field, $pattern)
     {
-        $this->payload['query']['bool']['must'][] = [
+        $this->body['query']['bool']['must'][] = [
             'wildcard' => [
                 $field => $pattern
             ]
@@ -191,7 +191,7 @@ class Client
      */
     public function raw($rawPayload)
     {
-        $this->rawPayload = $rawPayload;
+        $this->rawBody = $rawPayload;
         return $this;
     }
 
@@ -276,7 +276,7 @@ class Client
      */
     public function aggregate()
     {
-        $this->payload['aggs'] = [];
+        $this->body['aggs'] = [];
         return $this;
     }
 
@@ -286,7 +286,7 @@ class Client
      */
     public function groupBy($field)
     {
-        $this->payload['aggs'] = [
+        $this->body['aggs'] = [
             "group_by_$field" => [
                 'terms' => [
                     'field' => "$field.keyword"
@@ -303,8 +303,8 @@ class Client
      */
     public function most($size)
     {
-        $this->payload['aggs'][$this->fieldForAggregation]['terms']['order'] = ['_count' => 'desc'];
-        $this->payload['aggs'][$this->fieldForAggregation]['terms']['size'] = $size;
+        $this->body['aggs'][$this->fieldForAggregation]['terms']['order'] = ['_count' => 'desc'];
+        $this->body['aggs'][$this->fieldForAggregation]['terms']['size'] = $size;
         return $this;
     }
 
@@ -314,8 +314,8 @@ class Client
      */
     public function least($size)
     {
-        $this->payload['aggs'][$this->fieldForAggregation]['terms']['order'] = ['_count' => 'asc'];
-        $this->payload['aggs'][$this->fieldForAggregation]['terms']['size'] = $size;
+        $this->body['aggs'][$this->fieldForAggregation]['terms']['order'] = ['_count' => 'asc'];
+        $this->body['aggs'][$this->fieldForAggregation]['terms']['size'] = $size;
         return $this;
     }
 
@@ -326,7 +326,7 @@ class Client
      */
     protected function curl($url)
     {
-        $payload = strlen($this->rawPayload) ? $this->rawPayload : json_encode($this->payload);
+        $payload = strlen($this->rawBody) ? $this->rawBody : json_encode($this->body);
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
@@ -342,7 +342,7 @@ class Client
 
     protected function setScrollPayload()
     {
-        $this->payload = [
+        $this->body = [
             'scroll' => $this->contextAliveTime,
             'scroll_id' => $this->scrollId
         ];
@@ -355,7 +355,7 @@ class Client
     protected function appendDatetimeRange()
     {
         if (strlen($this->startDatetime) && strlen($this->endDatetime)) {
-            $this->payload['query']['bool']['must'][] = [
+            $this->body['query']['bool']['must'][] = [
                 'range' => [
                     '@timestamp' => [
                         'gte' => $this->startDatetime,
@@ -373,7 +373,7 @@ class Client
      */
     protected function appendSize()
     {
-        $this->payload['size'] = $this->size;
+        $this->body['size'] = $this->size;
         return $this;
     }
 
@@ -382,7 +382,7 @@ class Client
      */
     protected function appendFrom()
     {
-        $this->payload['from'] = $this->from;
+        $this->body['from'] = $this->from;
         return $this;
     }
 }

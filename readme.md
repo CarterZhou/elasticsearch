@@ -119,11 +119,9 @@ license. Please see the [license file](license.md) for more information.
 [ico-version]: https://img.shields.io/packagist/v/carterzhou/elasticsearch.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/carterzhou/elasticsearch.svg?style=flat-square
 [ico-travis]: https://img.shields.io/travis/carterzhou/elasticsearch/master.svg?style=flat-square
-[ico-styleci]: https://styleci.io/repos/12345678/shield
 
 [link-packagist]: https://packagist.org/packages/carterzhou/elasticsearch
 [link-downloads]: https://packagist.org/packages/carterzhou/elasticsearch
 [link-travis]: https://travis-ci.org/carterzhou/elasticsearch
-[link-styleci]: https://styleci.io/repos/12345678
 [link-author]: https://github.com/carterzhou
 [link-contributors]: ../../contributors
